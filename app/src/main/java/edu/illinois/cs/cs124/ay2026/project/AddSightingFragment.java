@@ -1,5 +1,10 @@
 package edu.illinois.cs.cs124.ay2026.project;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,9 +14,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import java.util.List;
 import retrofit2.Call;
@@ -21,6 +30,20 @@ import retrofit2.Response;
 public class AddSightingFragment extends Fragment {
 
     private static final String TAG = "AddSightingFragment";
+
+    private double selectedLat = 0;
+    private double selectedLng = 0;
+
+    private final ActivityResultLauncher<String> locationPermissionLauncher =
+        registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+            if (granted) {
+                getLocation();
+            } else {
+                Toast.makeText(requireContext(),
+                    "Location permission denied. You can still submit without a location.",
+                    Toast.LENGTH_LONG).show();
+            }
+        });
 
     @Nullable
     @Override
@@ -42,8 +65,67 @@ public class AddSightingFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
-        Button submitButton = view.findViewById(R.id.button_submit);
-        submitButton.setOnClickListener(v -> submitSighting(view));
+        view.findViewById(R.id.button_location).setOnClickListener(v -> requestLocation(view));
+        view.findViewById(R.id.button_submit).setOnClickListener(v -> submitSighting(view));
+    }
+
+    private void requestLocation(View view) {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            getLocation();
+        } else {
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
+    private void getLocation() {
+        LocationManager lm = (LocationManager) requireContext().getSystemService(LocationManager.class);
+
+        // Try last known location first (instant, no wait).
+        Location last = null;
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            last = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (last == null) {
+                last = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            }
+        }
+
+        if (last != null) {
+            setLocation(last);
+            return;
+        }
+
+        // No cached location — request a fresh one.
+        View view = getView();
+        if (view != null) {
+            ((TextView) view.findViewById(R.id.text_location_status)).setText("Getting location…");
+        }
+
+        LocationListener listener = new LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                setLocation(location);
+                lm.removeUpdates(this);
+            }
+        };
+
+        try {
+            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Location permission missing", e);
+        }
+    }
+
+    private void setLocation(Location location) {
+        selectedLat = location.getLatitude();
+        selectedLng = location.getLongitude();
+
+        View view = getView();
+        if (view != null) {
+            String coords = String.format("%.5f, %.5f", selectedLat, selectedLng);
+            ((TextView) view.findViewById(R.id.text_location_status)).setText(coords);
+        }
     }
 
     private void submitSighting(View view) {
@@ -71,6 +153,8 @@ public class AddSightingFragment extends Fragment {
         sighting.dateSpotted = date;
         sighting.backgroundInfo = backgroundField.getText().toString().trim();
         sighting.protectionTips = tipsField.getText().toString().trim();
+        sighting.latitude = selectedLat;
+        sighting.longitude = selectedLng;
 
         Button submitButton = view.findViewById(R.id.button_submit);
         submitButton.setEnabled(false);
@@ -105,5 +189,8 @@ public class AddSightingFragment extends Fragment {
         ((EditText) view.findViewById(R.id.edit_background)).setText("");
         ((EditText) view.findViewById(R.id.edit_tips)).setText("");
         ((Spinner) view.findViewById(R.id.spinner_animal_type)).setSelection(0);
+        ((TextView) view.findViewById(R.id.text_location_status)).setText("No location set");
+        selectedLat = 0;
+        selectedLng = 0;
     }
 }

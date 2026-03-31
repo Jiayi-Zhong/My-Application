@@ -93,6 +93,31 @@
             android:gravity="top"
             android:layout_marginBottom="24dp" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Location"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/text_location_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No location set"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/button_location"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Use My Location"
+            android:layout_marginBottom="24dp" />
+
         <Button
             android:id="@+id/button_submit"
             android:layout_width="match_parent"

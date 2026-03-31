@@ -56,6 +56,9 @@ dependencies {
     implementation("androidx.fragment:fragment:1.8.5")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 
+    // OSMDroid for the interactive map.
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
+
     // Retrofit for making HTTP requests to Supabase's REST API.
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     // Gson converter so Retrofit automatically converts JSON to Java objects.
