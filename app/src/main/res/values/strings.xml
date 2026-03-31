@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Animal Tracker</string>
+
+    <!-- Bottom navigation labels -->
+    <string name="nav_map">Map</string>
+    <string name="nav_add">Add Sighting</string>
+    <string name="nav_resources">Resources</string>
+
+    <!-- Placeholder text until each screen is fully built -->
+    <string name="map_placeholder">Map coming soon</string>
+    <string name="add_sighting_placeholder">Add Sighting form coming soon</string>
+    <string name="resources_placeholder">Resources coming soon</string>
+</resources>
