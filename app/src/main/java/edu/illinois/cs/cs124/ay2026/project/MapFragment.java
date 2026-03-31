@@ -69,6 +69,11 @@ public class MapFragment extends Fragment {
                     android.R.layout.simple_list_item_1,
                     labels
                 ));
+
+                listView.setOnItemClickListener((parent, itemView, position, id) -> {
+                    SightingDetailFragment detail = SightingDetailFragment.newInstance(sightings.get(position));
+                    detail.show(getParentFragmentManager(), "sighting_detail");
+                });
             }
 
             @Override

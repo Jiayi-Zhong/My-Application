@@ -4,6 +4,7 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -24,6 +25,7 @@ public interface SightingApi {
     );
 
     /** Insert a new sighting. Supabase returns the created row. */
+    @Headers("Prefer: return=representation")
     @POST("sightings")
     Call<List<Sighting>> addSighting(@Body Sighting sighting);
 }
